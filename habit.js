@@ -284,7 +284,25 @@ function getHabits(aview, amodel) {
                         console.log("there was a problem: the actions table was not loaded");
                     });
                  } else if(event.target.name === "delete") {
-                   //delete the object
+                     //delete the object
+                     model.load("habit", function(habits) {
+                         var match = false;
+                         for(var i = 0; i < habits.length && !match; i++) {
+                             console.log(event.target.parentNode.getAttribute("data-id"));
+                             if(parseInt(habits[i].id) === parseInt(event.target.parentNode.getAttribute("data-id"))) {
+                                 habits[i].active = false;
+                                 model.save("habit", habits[i], function(obj) {
+                                    console.log(obj);
+                                    match = true;
+                                    renderHabitList(ul); 
+                                 }, function() {
+                                     console.log("there was a problem: the habit could not be saved");
+                                 });
+                             }
+                         }
+                     }, function() {
+                         console.log("there was a problem: habits could not be loaded");
+                     });
                  }
                 //action.interval can be calculated and backfilled later
             });
