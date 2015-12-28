@@ -286,6 +286,8 @@ function getHabits(aview, amodel) {
                     model.load("action", function(actions) {
 //                        action.id = actions.length;
                         action.habit = event.target.parentNode.getAttribute("data-id");
+//action.duedate = habit.expirationdate 
+//do this with databind or with a query?
                         action.timestamp = Date.now();
                         model.save("action", action, function() {
                             renderHabitList(ul);
