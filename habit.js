@@ -1,3 +1,19 @@
+/**
+ * TODO:
+ * habit api: incorporate interval and expiration attributes
+ * delete habit from list
+ * madlibs form
+ * streak counting
+ * mark habit inactive
+ * make notifications for habit expiration
+ * implement a webworker for updates
+ * make habit creation form from habit object api
+ * convert between human readable and utc
+ * delay habit start time by adding a beginTime
+ * list habits by 'due date'
+ * limit habit at 10
+**/
+
 window.onload = function() {
     document.querySelector('#nojs').remove();
     var storage = getStorage();
