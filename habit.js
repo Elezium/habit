@@ -1,10 +1,8 @@
 /**
  * TODO:
  * habit api: incorporate interval and expiration attributes
- * delete habit from list
  * madlibs form
  * streak counting
- * mark habit inactive
  * make notifications for habit expiration
  * implement a webworker for updates
  * make habit creation form from habit object api
@@ -15,6 +13,17 @@
  * add due date to actions
  * add metadata table
  * give habits an endpoint
+ * refactor habit controller
+ * build a dropdown form for time
+**/
+
+/**
+ * Metadata table:
+ * id: a unique identifier
+ * major version: major version value
+ * minor version: minor version value
+ * patch/bugfix: patch count
+ * createtime: when the version was updated
 **/
 
 window.onload = function() {
