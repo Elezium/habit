@@ -12,6 +12,9 @@
  * delay habit start time by adding a beginTime
  * list habits by 'due date'
  * limit habit at 10
+ * add due date to actions
+ * add metadata table
+ * give habits an endpoint
 **/
 
 window.onload = function() {
@@ -127,7 +130,9 @@ function getHabits(aview, amodel) {
 
                 for(var k = 0; k < habit.length; k++) {
                     console.log(habit[k].expiration);
-                    renderHabit(ul, habit[k]);
+                    if(habit[k].active) {
+                        renderHabit(ul, habit[k]);
+                    }
                 }
             }, function() {
                 console.log("action table not loaded");
@@ -140,18 +145,22 @@ function getHabits(aview, amodel) {
     function renderHabit(ul, habit) {
         var li = document.createElement("li");
         var text = document.createTextNode(habit.label);
-        var a = document.createElement("a");
-//        var a2 = document.createElement('a');
-        
-        a.setAttribute("href", "#habit");
-        a.appendChild(document.createTextNode("done"));
-//        a2.setAttribute('href', '#habit'); //diff href value??
-//        a2.appendChild(document.createTextNode('remove'));
+        var done = document.createElement("button");
+        var edit = document.createElement("button");
+        var del = document.createElement("button");
+
+        done.setAttribute("type", "button");
+        done.appendChild(document.createTextNode("done"));
+        done.setAttribute("name", "done");
+
+        del.setAttribute("type", "button");
+        del.setAttribute("name", "delete");
+        del.appendChild(document.createTextNode("delete"));
 
         li.setAttribute("data-id", habit.id);
         li.appendChild(text);
-        li.appendChild(a);
-//        li.appendChild(a2);
+        li.appendChild(done);
+        li.appendChild(del);
 
         ul.appendChild(li);
     }
@@ -239,6 +248,7 @@ function getHabits(aview, amodel) {
                             field[i].value = field[i].defaultValue || "";
                         }
                     }
+                    habit.active = true;
                     habit.createTime = Date.now();
                     habit.id = habits.length;
                     model.save("habit", habit, function() {
@@ -261,20 +271,42 @@ function getHabits(aview, amodel) {
                  * update should include adjusting the expiration date
                 **/
                 //still needs to ensure a link has been clicked
-                event.preventDefault();
-                var action = {};
-                model.load("action", function(actions) {
-                    action.id = actions.length;
-                    action.habit = event.target.parentNode.getAttribute("data-id");
-                    action.timestamp = Date.now();
-                    model.save("action", action, function() {
-                        renderHabitList(ul);
+//                event.preventDefault();
+                if(event.target.name === "done") {
+                    var action = {};
+                    model.load("action", function(actions) {
+//                        action.id = actions.length;
+                        action.habit = event.target.parentNode.getAttribute("data-id");
+                        action.timestamp = Date.now();
+                        model.save("action", action, function() {
+                            renderHabitList(ul);
+                        }, function() {
+                            console.log("action could not be recorded");
+                        });
                     }, function() {
-                        console.log("action could not be recorded");
+                        console.log("there was a problem: the actions table was not loaded");
                     });
-                }, function() {
-                    console.log("there was a problem: the actions table was not loaded");
-                });
+                 } else if(event.target.name === "delete") {
+                     //delete the object
+                     model.load("habit", function(habits) {
+                         var match = false;
+                         for(var i = 0; i < habits.length && !match; i++) {
+                             console.log(event.target.parentNode.getAttribute("data-id"));
+                             if(parseInt(habits[i].id) === parseInt(event.target.parentNode.getAttribute("data-id"))) {
+                                 habits[i].active = false;
+                                 model.save("habit", habits[i], function(obj) {
+                                    console.log(obj);
+                                    match = true;
+                                    renderHabitList(ul); 
+                                 }, function() {
+                                     console.log("there was a problem: the habit could not be saved");
+                                 });
+                             }
+                         }
+                     }, function() {
+                         console.log("there was a problem: habits could not be loaded");
+                     });
+                 }
                 //action.interval can be calculated and backfilled later
             });
         }
@@ -330,7 +362,8 @@ function getStorage() {
             if(!database) {
                 failure(null);
             }
-            if(obj.id) {
+//something is wrong here
+            if(!obj.id) {
                 delete obj.id;
             } else {
                 obj.id = parseInt(obj.id);
