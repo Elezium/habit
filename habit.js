@@ -30,10 +30,11 @@
 window.onload = function() {
   document.querySelector('#nojs').remove();
   var storage = getStorage();
-  var appMain = document.querySelector('main');
+  var appMain = document.querySelector('main'); //view should be a abstract
   var habits = getHabits(appMain, storage); //should just be habits and actions
 
-  storage.init("habit", function() {    
+//need a generic success and failure function
+  storage.init("habit", function() {
     storage.createTable("habit", function() {
       storage.createTable("action", function() {
       //this can soon be replaced with habit.init(), which will call render
@@ -87,103 +88,111 @@ window.onload = function() {
 **/
 
 function getHabits(aview, amodel) {
-    var view = aview;
-    var model = amodel;
+/**
+ * a view needs to be an abstract means of printing things
+ * model should be a rdbm of habits
+**/
+  var view = aview;
+  var model = amodel;
 
-    function render() {
-        while(view.firstChild) {
-            view.firstChild.remove();
-        }
-
-        var form = document.createElement("form");
-        var ul = document.createElement("ul");
-        
-        //form creation goes here
-        getFormField(form, "text", "label", true);
-        getFormField(form, "text", "interval", false);
-        getFormField(form, "text", "duration", false);
-        //end form creation
-
-        renderHabitList(ul);
-        
-        view.appendChild(form);
-        view.appendChild(ul);
+//responsibility of view
+  function render() {
+    while(view.firstChild) {
+      view.firstChild.remove();
     }
-    
-    function renderHabitList(ul) {
-        console.log("render")
-        while(ul.firstChild) {
-            ul.firstChild.remove();
+
+    var form = document.createElement("form");
+    var ul = document.createElement("ul");
+        
+    //form creation goes here
+    getFormField(form, "text", "label", true);
+    getFormField(form, "text", "interval", false);
+    getFormField(form, "text", "duration", false);
+    //end form creation
+
+    renderHabitList(ul);
+        
+    view.appendChild(form);
+    view.appendChild(ul);
+  }
+
+//shared responsibility of view and habit
+  function renderHabitList(ul) {
+    console.log("render")
+    while(ul.firstChild) {
+      ul.firstChild.remove();
+    }
+
+    model.load("habit", function(habit) {
+      model.load("action", function(action) {
+        for(var i = 0; i < habit.length; i++) {
+          for(var j = action.length; j > 0 && !habit[i].expiration; j--) {
+            if(parseInt(habit[i].id) === parseInt(action[j - 1].habit)) {
+              console.log(habit[i]);
+              console.log(action[j - 1]);
+              habit[i].expiration = parseInt(action[j - 1].timestamp) + parseInt(habit[i].interval);
+            }
+          }
+          if(!habit[i].expiration) {
+            habit[i].expiration = parseInt(habit[i].createTime) + parseInt(habit[i].interval);
+          }
+//          console.log(habit[i]);
         }
 
-        model.load("habit", function(habit) {
-            model.load("action", function(action) {
-                for(var i = 0; i < habit.length; i++) {
-                    for(var j = action.length; j > 0 && !habit[i].expiration; j--) {
-                        if(parseInt(habit[i].id) === parseInt(action[j - 1].habit)) {
-                            console.log(habit[i]);
-                            console.log(action[j - 1]);
-                            habit[i].expiration = parseInt(action[j - 1].timestamp) + parseInt(habit[i].interval);
-                        }
-                    }
-                    if(!habit[i].expiration) {
-                        habit[i].expiration = parseInt(habit[i].createTime) + parseInt(habit[i].interval);
-                    }
-//                    console.log(habit[i]);
-                }
-
-                habit.sort(function(a, b) {
-                    a.expiration = parseInt(a.expiration);
-                    b.expiration = parseInt(b.expiration);
-                    return parseInt(a.expiration - b.expiration);
-                });
-
-                for(var k = 0; k < habit.length; k++) {
-                    console.log(habit[k].expiration);
-                    if(habit[k].active) {
-                        renderHabit(ul, habit[k]);
-                    }
-                }
-            }, function() {
-                console.log("action table not loaded");
-            });
-        }, function() {
-            console.log("habit table not loaded");
+        habit.sort(function(a, b) {
+          a.expiration = parseInt(a.expiration);
+          b.expiration = parseInt(b.expiration);
+          return parseInt(a.expiration - b.expiration);
         });
-    }
 
-    function renderHabit(ul, habit) {
-        var li = document.createElement("li");
-        var text = document.createTextNode(habit.label);
-        var done = document.createElement("button");
-        var edit = document.createElement("button");
-        var del = document.createElement("button");
+        for(var k = 0; k < habit.length; k++) {
+          console.log(habit[k].expiration);
+          if(habit[k].active) {
+            renderHabit(ul, habit[k]);
+          }
+        }
+      }, function() {
+        console.log("action table not loaded");
+      });
+    }, function() {
+      console.log("habit table not loaded");
+    });
+  }
 
-        done.setAttribute("type", "button");
-        done.appendChild(document.createTextNode("done"));
-        done.setAttribute("name", "done");
+//responsibility of view
+  function renderHabit(ul, habit) {
+    var li = document.createElement("li");
+    var text = document.createTextNode(habit.label);
+    var done = document.createElement("button");
+    var edit = document.createElement("button");
+    var del = document.createElement("button");
 
-        del.setAttribute("type", "button");
-        del.setAttribute("name", "delete");
-        del.appendChild(document.createTextNode("delete"));
+    done.setAttribute("type", "button");
+    done.appendChild(document.createTextNode("done"));
+    done.setAttribute("name", "done");
 
-        li.setAttribute("data-id", habit.id);
-        li.appendChild(text);
-        li.appendChild(done);
-        li.appendChild(del);
+    del.setAttribute("type", "button");
+    del.setAttribute("name", "delete");
+    del.appendChild(document.createTextNode("delete"));
 
-        ul.appendChild(li);
-    }
+    li.setAttribute("data-id", habit.id);
+    li.appendChild(text);
+    li.appendChild(done);
+    li.appendChild(del);
 
-    function getFormField(form, type, tag, required) {
-        var label, input;
-        label = form.appendChild(document.createElement("label"));
-        label.setAttribute("for", tag);
-        label.appendChild(document.createTextNode(tag));
-        input = form.appendChild(document.createElement("input"));
-        input.setAttribute("type", type);
-        input.setAttribute("name", tag);
-    }
+    ul.appendChild(li);
+  }
+
+//responsibility of view
+  function getFormField(form, type, tag, required) {
+    var label, input;
+    label = form.appendChild(document.createElement("label"));
+    label.setAttribute("for", tag);
+    label.appendChild(document.createTextNode(tag));
+    input = form.appendChild(document.createElement("input"));
+    input.setAttribute("type", type);
+    input.setAttribute("name", tag);
+  }
 
     return {
         //actions being passed in need to be used to better constitute actions
