@@ -1,8 +1,8 @@
 # Contributing Guide
 
-# Git Stuff
+## Git Stuff
 
-## Forking and Setting up a Local Copy
+### Forking and Setting up a Local Copy
 
 1) Fork the copy to your github account
 
@@ -15,7 +15,7 @@ of steps.
 
 [forkarepo]: https://help.github.com/articles/fork-a-repo/
 
-## Making Edits, Additions, and Deletions
+### Making Edits, Additions, and Deletions
 
 habit follows a loose version of [gitflow][nviegitflow] on the
 [central repository][centrepo], but this really only effects you in a few ways:
@@ -47,7 +47,7 @@ git checkout -b c-someContent develop
 [centrepo]: https://github.com/beingbrown/habit
 [nviegitflow]: http://nvie.com/posts/a-successful-git-branching-model/
 
-## Committing
+### Committing
 
 Make sure that each commit only contains one change. It's a lot less annoying to
 have to sift through 20 commits each with 1 different change than 1 commit with
@@ -57,7 +57,7 @@ you should probably split up the commit with `git add -p`.
 When in doubt, follow the
 [Erlang OTP Git Commit Guide](https://github.com/erlang/otp/wiki/Writing-good-commit-messages).
 
-## Preparing for and Making a Pull Request
+### Preparing for and Making a Pull Request
 
 Once you have made all your changes, you want to get them merged into the
 central repo. Here is the process:
