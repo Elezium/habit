@@ -12,6 +12,9 @@
  * delay habit start time by adding a beginTime
  * list habits by 'due date'
  * limit habit at 10
+ * add due date to actions
+ * add metadata table
+ * give habits an endpoint
 **/
 
 window.onload = function() {
