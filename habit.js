@@ -127,7 +127,9 @@ function getHabits(aview, amodel) {
 
                 for(var k = 0; k < habit.length; k++) {
                     console.log(habit[k].expiration);
-                    renderHabit(ul, habit[k]);
+                    if(habit[k].active) {
+                        renderHabit(ul, habit[k]);
+                    }
                 }
             }, function() {
                 console.log("action table not loaded");
@@ -239,6 +241,7 @@ function getHabits(aview, amodel) {
                             field[i].value = field[i].defaultValue || "";
                         }
                     }
+                    habit.active = true;
                     habit.createTime = Date.now();
                     habit.id = habits.length;
                     model.save("habit", habit, function() {
