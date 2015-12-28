@@ -26,34 +26,35 @@
  * createtime: when the version was updated
 **/
 
+//assumes a window object
 window.onload = function() {
-    document.querySelector('#nojs').remove();
-    var storage = getStorage();
-    var appMain = document.querySelector('main');
-    var habits = getHabits(appMain, storage); //should just be habits and actions
+  document.querySelector('#nojs').remove();
+  var storage = getStorage();
+  var appMain = document.querySelector('main');
+  var habits = getHabits(appMain, storage); //should just be habits and actions
 
-    storage.init("habit", function() {    
-        storage.createTable("habit", function() {
-            storage.createTable("action", function() {
-                //this can soon be replaced with habit.init(), which will call render
-                storage.load("habit", function(list) {
-                    storage.load("action", function(actions) {
-                        habits.init(list, actions);
-                    }, function() {
-                        console.log("could not retrive actions");
-                    });
-                }, function() {
-                    console.log("could not retreve habits");
-                });
-            }, function() {
-                console.log("creating action table failed");
-            });
+  storage.init("habit", function() {    
+    storage.createTable("habit", function() {
+      storage.createTable("action", function() {
+      //this can soon be replaced with habit.init(), which will call render
+        storage.load("habit", function(list) {
+          storage.load("action", function(actions) {
+            habits.init(list, actions);
+          }, function() {
+            console.log("could not retrive actions");
+          });
         }, function() {
-            console.log("creating habit table failed");
+          console.log("could not retreve habits");
         });
+      }, function() {
+        console.log("creating action table failed");
+      });
     }, function() {
-        console.log("indexeddb could not be initialized");
+      console.log("creating habit table failed");
     });
+  }, function() {
+    console.log("indexeddb could not be initialized");
+  });
 };
 
 /**
