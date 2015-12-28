@@ -272,7 +272,7 @@ function getHabits(aview, amodel) {
                 if(event.target.name === "done") {
                     var action = {};
                     model.load("action", function(actions) {
-                        action.id = actions.length;
+//                        action.id = actions.length;
                         action.habit = event.target.parentNode.getAttribute("data-id");
                         action.timestamp = Date.now();
                         model.save("action", action, function() {
@@ -359,7 +359,8 @@ function getStorage() {
             if(!database) {
                 failure(null);
             }
-            if(obj.id) {
+//something is wrong here
+            if(!obj.id) {
                 delete obj.id;
             } else {
                 obj.id = parseInt(obj.id);
