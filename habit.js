@@ -376,15 +376,15 @@ function getStorage() {
           success(null);
         };
         request.onfailure = function(event) {
-          failure(null);
+          failure("database " + namespace + " could not be created");
         };
       } else {
-        failure(null);
+        failure("indexedDB is not available");
       }
     },
     createTable: function(table, success, failure) {
       if(!database) {
-        failure(null);
+        failure("database not found");
       }
       var exists = false;
       for(var i = 0; i < database.objectStoreNames.length && !exists; i++) {
@@ -400,7 +400,7 @@ function getStorage() {
           success(null);
         };
         request.onerror = function(event) {
-          failure(null);
+          failure("table " + table + " could not be created");
         };
         request.onupgradeneeded = function(event) {
           database = event.target.result;
@@ -410,7 +410,7 @@ function getStorage() {
     },
     save: function(table, obj, success, failure) {
       if(!database) {
-        failure(null);
+        failure("database not found");
       }
 //something is wrong here
       if(!obj.id) {
@@ -423,7 +423,7 @@ function getStorage() {
         success(obj);
       };
       transaction.onerror = function(event) {
-        failure(null);
+        failure("transaction failed on " + table);
       };
       var objectStore = transaction.objectStore(table);
       var request = objectStore.put(obj);
@@ -431,12 +431,12 @@ function getStorage() {
         obj.id = event.target.result;
       };
       request.onerror = function(event) {
-        failure(null);
+        failure("request failed on " + table);
       };
     },
     load: function(table, success, failure) {
       if(!database) {
-        failure(null);
+        failure("database not found");
       }
       var result = [];
       var transaction = database.transaction(table);
