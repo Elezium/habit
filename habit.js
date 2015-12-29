@@ -187,6 +187,38 @@ function getHabits(aview, amodel) {
     });
   }
 
+  function notify(notice) {
+    console.log(notice);
+  }
+
+//this is probably better off bound to an actual habit object
+  function compare(habit1, habit2) {
+    console.log(habit1.expiration, habit2.expiration);
+    habit1.expiration = parseInt(habit1.expiration);
+    habit2.expiration = parseInt(habit2.expiration);
+    return parseInt(habit1.expiration - habit2.expiration);
+  }
+
+//this is probably better off in some habit object
+  function getHabitExpiration(habit, actions) {
+    var match, habitId, actionHabit;
+    match = false;
+    habitId = parseInt(habit.id);
+    for(var i = (actions.length - 1); i >= 0 && !match; i--) {
+      actionHabit = parseInt(actions[i].habit)
+      if(habitId === actionHabit) {
+        console.log("match found on action " + i);
+        habit.expiration = parseInt(actions[i].timestamp) + parseInt(habit.interval);
+        match = true;
+      }
+    }
+    if(!habit.expiration) {
+      habit.expiration = parseInt(habit.createTime) + parseInt(habit.interval);
+    }
+    console.log(habit.expiration);
+    return habit;
+  }
+
 //responsibility of view
   function renderHabit(ul, habit) {
     var li = document.createElement("li");
