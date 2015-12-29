@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HabitAPI</name>
+    </assembly>
+    <members>
+        <member name="T:HabitAPI.Controllers.HabitsController">
+            <summary>
+            This class is used as an API to get the habit.
+            </summary>
+        </member>
+        <member name="M:HabitAPI.Controllers.HabitsController.Get">
+            <summary>
+            This method returns all the habits
+            </summary>        
+            <returns>All habits found in the database</returns>
+        </member>
+        <member name="M:HabitAPI.Controllers.HabitsController.Get(System.Int32)">
+            <summary>
+            This method returns only one (1) habit specified by the id
+            </summary>
+            <param name="id">id of the habit</param>
+            <returns>One (1) habit</returns>
+        </member>
+        <member name="M:HabitAPI.Controllers.HabitsController.Post(HabitAPI.Models.Habit)">
+            <summary>
+            This method ADD a habit.  Habit object must be in the body of the request in JSON
+            </summary>
+            <returns>Nothing for now</returns>
+        </member>
+        <member name="M:HabitAPI.Controllers.HabitsController.Put(System.Int32,HabitAPI.Models.Habit)">
+            <summary>
+            This method UPDATE a habit specfied by the ID.  Habit object must be in the body of the request in JSON
+            You can provide only the field(s) to be updated.
+            </summary>
+            <param name="id">id of the habit</param>
+            <returns>Nothing for now</returns>
+        </member>
+        <member name="M:HabitAPI.Controllers.HabitsController.Delete(System.Int32)">
+            <summary>
+            This method DELETE a habit specfied by the ID. 
+            </summary>        
+            <param name="id">id of the habit</param>
+            <returns>Nothing for now</returns>
+        </member>
+    </members>
+</doc>
