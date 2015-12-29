@@ -40,7 +40,7 @@ window.onload = function() {
       //this can soon be replaced with habit.init(), which will call render
         storage.load("habit", function(list) {
           storage.load("action", function(actions) {
-            habits.init(list, actions);
+            habits.start(list, actions);
           }, function() {
             console.log("could not retrive actions");
           });
@@ -165,11 +165,88 @@ function getHabits(aview, amodel) {
             renderHabit(ul, habit[k]);
           }
         }
-      }, function() {
-        console.log("action table not loaded");
-      });
-    }, function() {
-      console.log("habit table not loaded");
+      }, notify);
+    }, notify);
+  }
+
+  function assignEventListeners() {
+    var form = view.querySelector("form");
+    var ul = view.querySelector("ul");
+    assignFormListener(form, ul);
+    assignListListener(ul);
+  }
+
+  function assignFormListener(form, ul) {
+    form.addEventListener("submit", function(event) {
+      /**
+       * the rest of the habit api should be implemented here
+       * interval should be a value that is converted to milliseconds
+       * expiration should be a calculated value and not stored here
+      **/
+      event.preventDefault();
+      model.load("habit", function(habits) {
+        var field = event.target.querySelectorAll("input");
+        var habit = {};
+        for(var i = 0; i < field.length; i++) {
+          if(field[i].name != event.type) {
+            habit[field[i].name] = field[i].value;
+            field[i].value = field[i].defaultValue || "";
+          }
+        }
+        habit.active = true;
+        habit.createTime = Date.now();
+//        habit.id = habits.length;
+        model.save("habit", habit, function() {
+        //the new habit should have the updated id
+//        habits[habit.id] = habit;
+          renderHabitList(ul);
+//           render();
+        }, notify);
+      }, notify);
+    });    
+  }
+
+  function assignListListener(ul) {
+    ul.addEventListener("click", function(event) {
+      //this is where the done button is handled
+      /**
+       * if a link is clicked, update the relevant habit
+       * add a new action record to the action table
+       * then rerender the page
+       * update should include adjusting the expiration date
+      **/
+      //still needs to ensure a link has been clicked
+//      event.preventDefault();
+      if(event.target.name === "done") {
+        var action = {};
+        model.load("action", function(actions) {
+//          action.id = actions.length;
+          action.habit = event.target.parentNode.getAttribute("data-id");
+//action.duedate = habit.expirationdate 
+//do this with databind or with a query?
+          action.timestamp = Date.now();
+          model.save("action", action, function() {
+            renderHabitList(ul);
+          }, notify);
+        }, notify);
+      } else if(event.target.name === "delete") {
+        //delete the object
+        model.load("habit", function(habits) {
+          var match = false;
+          for(var i = 0; i < habits.length && !match; i++) {
+            console.log(event.target.parentNode.getAttribute("data-id"));
+            if(parseInt(habits[i].id) === parseInt(event.target.parentNode.getAttribute("data-id"))) {
+              habits[i].active = false;
+              model.save("habit", habits[i], function(obj) {
+                console.log(obj);
+                match = true;
+                renderHabitList(ul);
+              }, notify);
+            }
+          }
+        }, notify);
+      }
+    //action.interval can be calculated and backfilled later
     });
   }
 
@@ -244,7 +321,9 @@ function getHabits(aview, amodel) {
     //actions being passed in need to be used to better constitute actions
     //the relevant object keys need to be prevented from storage in the db
     //these shouldn't be passed in anymore
-      init: function(list, actions) {
+    start: function(list, actions) {
+      render();
+      assignEventListeners();
         /**
          * How to set habit expiration:
          * Find the last action entry with the relevant habit id
@@ -257,126 +336,7 @@ function getHabits(aview, amodel) {
         //there's a better way to do this but i'm being lazy
         /*Format*/
         /*I will (label) every (interval) for (duration) */
-        var form = document.createElement("form");
-        var ul = document.createElement("ul");
 
-        var button = document.createElement('input');
-            
-        var input = document.createElement("input");
-        var input2 = document.createElement("input");
-//            var input3 = document.createElement("input");
-
-        var l1 = document.createElement("label"); //this
-        var l2 = document.createElement('label');
-
-        button.setAttribute('type', 'submit');
-        button.setAttribute("name", "submit");
-
-        input.setAttribute("type", "text");
-        input.setAttribute("name", "label");
-        input.required = true;
-            
-        input2.setAttribute("type", "text");
-        input2.setAttribute("name", "interval");
-        input2.defaultValue = 86400000;
-
-        l1.appendChild(document.createTextNode("I will"));
-        l1.setAttribute("for", "label"); //what input field is being marked
-
-        l2.appendChild(document.createTextNode('every'));
-        l2.setAttribute('for', 'interval');
-
-        form.appendChild(l1);
-        form.appendChild(input);
-        form.appendChild(l2);
-        form.appendChild(input2);
-        form.appendChild(button);
-
-        renderHabitList(ul);
-
-        view.appendChild(form);
-        view.appendChild(ul);
-
-        form.addEventListener("submit", function(event) {
-          /**
-           * the rest of the habit api should be implemented here
-           * interval should be a value that is converted to milliseconds
-           * expiration should be a calculated value and not stored here
-          **/
-          event.preventDefault();
-          model.load("habit", function(habits) {
-            var field = event.target.querySelectorAll("input");
-            var habit = {};
-            for(var i = 0; i < field.length; i++) {
-              if(field[i].name != event.type) {
-                habit[field[i].name] = field[i].value;
-                field[i].value = field[i].defaultValue || "";
-              }
-            }
-            habit.active = true;
-            habit.createTime = Date.now();
-            habit.id = habits.length;
-            model.save("habit", habit, function() {
-            //the new habit should have the updated id
-//            habits[habit.id] = habit;
-            renderHabitList(ul);
-          }, function() {
-            console.log("something went wrong! habit not saved");                  
-          });
-        }, function() {
-          console.log("habit table could not be loaded");                    
-        });
-      });
-
-      ul.addEventListener("click", function(event) {
-        //this is where the done button is handled
-        /**
-         * if a link is clicked, update the relevant habit
-         * add a new action record to the action table
-         * then rerender the page
-         * update should include adjusting the expiration date
-        **/
-        //still needs to ensure a link has been clicked
-//        event.preventDefault();
-        if(event.target.name === "done") {
-          var action = {};
-          model.load("action", function(actions) {
-//            action.id = actions.length;
-            action.habit = event.target.parentNode.getAttribute("data-id");
-//action.duedate = habit.expirationdate 
-//do this with databind or with a query?
-            action.timestamp = Date.now();
-            model.save("action", action, function() {
-              renderHabitList(ul);
-            }, function() {
-              console.log("action could not be recorded");
-            });
-          }, function() {
-            console.log("there was a problem: the actions table was not loaded");
-          });
-        } else if(event.target.name === "delete") {
-          //delete the object
-          model.load("habit", function(habits) {
-            var match = false;
-            for(var i = 0; i < habits.length && !match; i++) {
-              console.log(event.target.parentNode.getAttribute("data-id"));
-              if(parseInt(habits[i].id) === parseInt(event.target.parentNode.getAttribute("data-id"))) {
-                habits[i].active = false;
-                model.save("habit", habits[i], function(obj) {
-                  console.log(obj);
-                  match = true;
-                  renderHabitList(ul); 
-                }, function() {
-                  console.log("there was a problem: the habit could not be saved");
-                });
-              }
-            }
-          }, function() {
-            console.log("there was a problem: habits could not be loaded");
-          });
-        }
-        //action.interval can be calculated and backfilled later
-      });
     }
   };
 }
