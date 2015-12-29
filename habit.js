@@ -104,16 +104,44 @@ function getHabits(aview, amodel) {
     var form = document.createElement("form");
     var ul = document.createElement("ul");
         
-    //form creation goes here
-    getFormField(form, "text", "label", true);
-    getFormField(form, "text", "interval", false);
-    getFormField(form, "text", "duration", false);
-    //end form creation
-
+    renderForm(form);
     renderHabitList(ul);
         
     view.appendChild(form);
     view.appendChild(ul);
+  }
+
+  function renderForm(formNode) {
+    var button = document.createElement('input');
+
+    var input = document.createElement("input");
+    var input2 = document.createElement("input");
+
+    var l1 = document.createElement("label");
+    var l2 = document.createElement('label');
+
+    button.setAttribute('type', 'submit');
+    button.setAttribute("name", "submit");
+
+    input.setAttribute("type", "text");
+    input.setAttribute("name", "label");
+    input.required = true;
+
+    input2.setAttribute("type", "text");
+    input2.setAttribute("name", "interval");
+    input2.defaultValue = 86400000;
+
+    l1.appendChild(document.createTextNode("I will"));
+    l1.setAttribute("for", "label");
+
+    l2.appendChild(document.createTextNode('every'));
+    l2.setAttribute('for', 'interval');
+
+    formNode.appendChild(l1);
+    formNode.appendChild(input);
+    formNode.appendChild(l2);
+    formNode.appendChild(input2);
+    formNode.appendChild(button);
   }
 
 //shared responsibility of view and habit
