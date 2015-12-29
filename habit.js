@@ -154,27 +154,13 @@ function getHabits(aview, amodel) {
     model.load("habit", function(habit) {
       model.load("action", function(action) {
         for(var i = 0; i < habit.length; i++) {
-          for(var j = action.length; j > 0 && !habit[i].expiration; j--) {
-            if(parseInt(habit[i].id) === parseInt(action[j - 1].habit)) {
-              console.log(habit[i]);
-              console.log(action[j - 1]);
-              habit[i].expiration = parseInt(action[j - 1].timestamp) + parseInt(habit[i].interval);
-            }
-          }
-          if(!habit[i].expiration) {
-            habit[i].expiration = parseInt(habit[i].createTime) + parseInt(habit[i].interval);
-          }
-//          console.log(habit[i]);
+          habit[i] = getHabitExpiration(habit[i], action);
         }
 
-        habit.sort(function(a, b) {
-          a.expiration = parseInt(a.expiration);
-          b.expiration = parseInt(b.expiration);
-          return parseInt(a.expiration - b.expiration);
-        });
+        habit.sort(compare);
+        console.log(habit);
 
         for(var k = 0; k < habit.length; k++) {
-          console.log(habit[k].expiration);
           if(habit[k].active) {
             renderHabit(ul, habit[k]);
           }
